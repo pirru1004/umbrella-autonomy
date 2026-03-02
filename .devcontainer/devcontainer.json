@@ -1,0 +1,15 @@
+{
+  "name": "Umbrella ROS2 Humble",
+  "image": "osrf/ros:humble-desktop",
+  "features": {},
+  "postCreateCommand": "sudo apt update && sudo apt install -y python3-colcon-common-extensions ros-humble-nav2-bringup ros-humble-turtlebot3* && echo 'source /opt/ros/humble/setup.bash' >> ~/.bashrc",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-iot.vscode-ros",
+        "twxs.cmake"
+      ]
+    }
+  }
+}
