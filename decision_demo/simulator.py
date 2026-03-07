@@ -9,19 +9,31 @@ def run_simulation(steps=25, size=20):
     manager = DecisionManager()
 
     position = (2, 2)
+    previous_position = None
+    visited_positions = [position]
+
     path = [position]
     decisions = []
 
     for step in range(steps):
-        decision = manager.decide(position, science_map, hazard_map, resources)
+        decision = manager.decide(
+            position,
+            science_map,
+            hazard_map,
+            resources,
+            previous_position=previous_position,
+            visited_positions=visited_positions
+        )
         decisions.append(decision)
 
         if decision["mode"] in ["SAFE_STOP", "RETURN"]:
             path.append(decision["target"])
             break
 
+        previous_position = position
         position = decision["target"]
         path.append(position)
+        visited_positions.append(position)
 
         # Fake energy drain
         resources["energy_state"] -= 0.01
@@ -52,5 +64,5 @@ if __name__ == "__main__":
     science_map, hazard_map, path, decisions = run_simulation()
     plot_simulation(science_map, hazard_map, path)
 
-    for i, d in enumerate(decisions[:10]):
+    for i, d in enumerate(decisions[:15]):
         print(f"Step {i}: mode={d['mode']} target={d['target']} reason={d['reason']}")
