@@ -1,24 +1,26 @@
 def get_manual_inputs():
     science_candidates = [
-        {"id": 1, "x": 14, "y": 16, "science_score": 0.91, "confidence": 0.82, "mineral_type": "clay"},
-        {"id": 2, "x": 6, "y": 9,  "science_score": 0.78, "confidence": 0.90, "mineral_type": "basalt"},
+        {"id": 2, "x": 14, "y": 16, "science_score": 0.91, "confidence": 0.82, "mineral_type": "clay"},
+        {"id": 1, "x": 6, "y": 9,  "science_score": 0.78, "confidence": 0.90, "mineral_type": "basalt"},
+        {"id": 4, "x": 12, "y": 8, "science_score": 0.2, "confidence": 0.15, "mineral_type": "aluminium"}
         {"id": 3, "x": 17, "y": 4, "science_score": 0.69, "confidence": 0.75, "mineral_type": "sulfate"}
     ]
 
     resource_state = {
-        "energy_state": 0.42,
+        "energy_state": 0.82,
         "comms_state": "OK",       # OK / DEGRADED / LOST
-        "compute_margin": 0.78,
-        "risk_level": 0.33,
+        "compute_margin": 0.58,
+        "risk_level": 0.93,
         "wind_state": 0.20
     }
 
     hazard_overrides = {
-        1: {"hazard_score": 0.65, "distance_cost": 0.50},
-        2: {"hazard_score": 0.25, "distance_cost": 0.20},
-        3: {"hazard_score": 0.40, "distance_cost": 0.60}
+        1: {"hazard_score": 0.5, "distance_cost": 0.90},
+        2: {"hazard_score": 0.65, "distance_cost": 0.15},
+        4: {"hazard_score": 0.68, "distance_cost": 0.80}
+        3: {"hazard_score": 0.77, "distance_cost": 0.76}
     }
 
-    rover_position = (2, 2)
+    rover_position = (4, 3)
 
     return science_candidates, resource_state, hazard_overrides, rover_position
