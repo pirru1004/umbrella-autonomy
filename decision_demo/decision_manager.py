@@ -2,10 +2,14 @@ import numpy as np
 
 
 class DecisionManager:
-    def __init__(self, w_science=1.0, w_hazard=1.2, w_energy=0.8, low_energy_threshold=0.2):
+    def __init__(self, w_science=1.0, w_hazard=1.2, w_energy=0.8,
+                 w_return_penalty=0.8, w_visit_penalty=0.2,
+                 low_energy_threshold=0.2):
         self.w_science = w_science
         self.w_hazard = w_hazard
         self.w_energy = w_energy
+        self.w_return_penalty = w_return_penalty
+        self.w_visit_penalty = w_visit_penalty
         self.low_energy_threshold = low_energy_threshold
 
     def get_neighbors(self, x, y, size):
@@ -20,9 +24,13 @@ class DecisionManager:
                 neighbors.append((nx, ny))
         return neighbors
 
-    def decide(self, position, science_map, hazard_map, resources):
+    def decide(self, position, science_map, hazard_map, resources,
+               previous_position=None, visited_positions=None):
         x, y = position
         size = science_map.shape[0]
+
+        if visited_positions is None:
+            visited_positions = []
 
         # Guardrails
         if resources["comms_state"] == "LOST":
@@ -49,16 +57,30 @@ class DecisionManager:
             science_score = science_map[nx, ny]
             hazard_score = hazard_map[nx, ny]
 
+            return_penalty = 0.0
+            if previous_position is not None and (nx, ny) == previous_position:
+                return_penalty = self.w_return_penalty
+
+            visit_penalty = 0.0
+            if (nx, ny) in visited_positions:
+                visit_penalty = self.w_visit_penalty
+
             utility = (
                 self.w_science * science_score
                 - self.w_hazard * hazard_score
                 - self.w_energy * (1.0 - resources["energy_state"])
+                - return_penalty
+                - visit_penalty
             )
 
             if utility > best_score:
                 best_score = utility
                 best_target = (nx, ny)
-                best_reason = f"science={science_score:.2f}, hazard={hazard_score:.2f}, utility={utility:.2f}"
+                best_reason = (
+                    f"science={science_score:.2f}, hazard={hazard_score:.2f}, "
+                    f"return_penalty={return_penalty:.2f}, visit_penalty={visit_penalty:.2f}, "
+                    f"utility={utility:.2f}"
+                )
 
         return {
             "mode": "NORMAL",
