@@ -16,8 +16,8 @@ def get_manual_inputs():
 
     hazard_overrides = {
         1: {"hazard_score": 0.5, "distance_cost": 0.90},
-        2: {"hazard_score": 0.65, "distance_cost": 0.15},
-        4: {"hazard_score": 0.68, "distance_cost": 0.80},
+        2: {"hazard_score": 0.65, "distance_cost": 0.55},
+        4: {"hazard_score": 0.68, "distance_cost": 0.70},
         3: {"hazard_score": 0.77, "distance_cost": 0.76}
     }
 
