@@ -1,6 +1,6 @@
 def get_manual_inputs():
     science_candidates = [
-        {"id": 2, "x": 14, "y": 16, "science_score": 0.91, "confidence": 0.82, "mineral_type": "clay"},
+        {"id": 2, "x": 14, "y": 16, "science_score": 0.61, "confidence": 0.82, "mineral_type": "clay"},
         {"id": 1, "x": 6, "y": 9,  "science_score": 0.78, "confidence": 0.50, "mineral_type": "basalt"},
         {"id": 4, "x": 8, "y": 5, "science_score": 0.8, "confidence": 0.95, "mineral_type": "aluminium"},
         {"id": 3, "x": 17, "y": 4, "science_score": 0.69, "confidence": 0.75, "mineral_type": "sulfate"}
