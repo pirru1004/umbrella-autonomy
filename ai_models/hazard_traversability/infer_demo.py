@@ -1,9 +1,12 @@
 import torch
 import matplotlib.pyplot as plt
+import numpy as np
 
 from ai_models.hazard_traversability.dataset_utils import prepare_numpy_dataset
 from ai_models.hazard_traversability.model import SimpleHazardCNN, logits_to_outputs
 
+unique, counts = np.unique(y, return_counts=True)
+print("Label distribution:", dict(zip(unique, counts)))
 
 LABEL_NAMES = {
     0: "safe",
