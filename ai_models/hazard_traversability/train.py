@@ -45,7 +45,14 @@ def train_model(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     model = SimpleHazardCNN(num_classes=3).to(device)
-    criterion = nn.CrossEntropyLoss()
+    class_counts = np.bincount(y, minlength=3)
+    class_weights = 1.0 / class_counts
+    class_weights = class_weights / class_weights.sum() * 3.0
+    class_weights = torch.tensor(class_weights, dtype=torch.float32).to(device)
+
+print("Class weights:", class_weights)
+
+criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
