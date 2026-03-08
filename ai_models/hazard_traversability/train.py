@@ -107,3 +107,12 @@ train_model(
 
 if __name__ == "__main__":
     train_model()
+
+print("Saving trained weights NOW...")
+
+import os, datetime
+print("Saved model timestamp:", datetime.datetime.fromtimestamp(os.path.getmtime(model_save_path)))
+print("Saved model size:", os.path.getsize(model_save_path))
+
+
+
