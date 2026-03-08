@@ -1,59 +1,66 @@
-class HazardTraversabilityModel:
-    def __init__(
-        self,
-        w_slope=0.30,
-        w_rock=0.25,
-        w_soft_soil=0.20,
-        w_obstacle=0.15,
-        w_uncertainty=0.10
-    ):
-        self.w_slope = w_slope
-        self.w_rock = w_rock
-        self.w_soft_soil = w_soft_soil
-        self.w_obstacle = w_obstacle
-        self.w_uncertainty = w_uncertainty
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
-    def classify_hazard_type(self, slope, rock_density, soft_soil_risk, obstacle_presence):
-        if slope > 0.7 and rock_density > 0.5:
-            return "rocky_steep"
-        if soft_soil_risk > 0.7:
-            return "soft_soil"
-        if obstacle_presence > 0.7:
-            return "obstacle_heavy"
-        if slope < 0.3 and rock_density < 0.3 and soft_soil_risk < 0.3:
-            return "safe_flat"
-        return "moderate"
 
-    def evaluate_candidate(self, candidate_features):
-        slope = candidate_features["slope"]
-        rock_density = candidate_features["rock_density"]
-        soft_soil_risk = candidate_features["soft_soil_risk"]
-        obstacle_presence = candidate_features["obstacle_presence"]
-        terrain_uncertainty = candidate_features["terrain_uncertainty"]
+class SimpleHazardCNN(nn.Module):
+    def __init__(self, num_classes=3):
+        super().__init__()
 
-        hazard_score = (
-            self.w_slope * slope +
-            self.w_rock * rock_density +
-            self.w_soft_soil * soft_soil_risk +
-            self.w_obstacle * obstacle_presence +
-            self.w_uncertainty * terrain_uncertainty
+        self.features = nn.Sequential(
+            nn.Conv2d(3, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+
+            nn.Conv2d(16, 32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2),
+
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(2)
         )
 
-        hazard_score = max(0.0, min(1.0, hazard_score))
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(64 * 16 * 16, 128),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(128, num_classes)
+        )
+
+    def forward(self, x):
+        x = self.features(x)
+        x = self.classifier(x)
+        return x
+
+
+def logits_to_outputs(logits):
+    probs = F.softmax(logits, dim=1)
+    pred_class = torch.argmax(probs, dim=1)
+
+    outputs = []
+    for i in range(len(pred_class)):
+        cls = pred_class[i].item()
+        conf = probs[i, cls].item()
+
+        if cls == 0:
+            hazard_type = "safe"
+            hazard_score = 1.0 - conf * 0.3
+        elif cls == 1:
+            hazard_type = "moderate"
+            hazard_score = 0.5
+        else:
+            hazard_type = "hazardous"
+            hazard_score = min(1.0, 0.6 + conf * 0.4)
+
         traversability_score = 1.0 - hazard_score
 
-        hazard_type = self.classify_hazard_type(
-            slope, rock_density, soft_soil_risk, obstacle_presence
-        )
+        outputs.append({
+            "hazard_type": hazard_type,
+            "hazard_score": float(hazard_score),
+            "traversability_score": float(traversability_score),
+            "confidence": float(conf)
+        })
 
-        return {
-            "hazard_score": hazard_score,
-            "traversability_score": traversability_score,
-            "hazard_type": hazard_type
-        }
-
-    def evaluate_all_candidates(self, terrain_inputs):
-        results = {}
-        for cid, features in terrain_inputs.items():
-            results[cid] = self.evaluate_candidate(features)
-        return results
+    return outputs
