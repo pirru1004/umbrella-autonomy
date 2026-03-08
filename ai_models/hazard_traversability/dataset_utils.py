@@ -69,8 +69,10 @@ def preprocess_example(example, image_size=(128, 128)):
 
     label = mask_to_hazard_label(mask_np)
 
-    return image_np, label
+    if label is None:
+        return None, None
 
+    return image_np, label
 
 def load_ai4mars_subset(split="train", raw_limit=200):
     """
