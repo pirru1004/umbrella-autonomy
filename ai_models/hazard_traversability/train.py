@@ -8,13 +8,13 @@ from ai_models.hazard_traversability.dataset_utils import prepare_numpy_dataset
 from ai_models.hazard_traversability.model import SimpleHazardCNN
 
 
-def train_model(
+train_model(
     split="train",
-    num_samples=300,
-    raw_limit=500,
+    num_samples=800,
+    raw_limit=1200,
     batch_size=16,
     learning_rate=1e-3,
-    num_epochs=3,
+    num_epochs=8,
     val_fraction=0.2,
     model_save_path="ai_models/hazard_traversability/hazard_cnn_baseline.pth"
 ):
