@@ -3,16 +3,13 @@ import numpy as np
 from PIL import Image
 
 
-# Simple grouping from AI4Mars terrain labels to hazard classes
-# We will refine this later once we inspect the exact label IDs present.
-# For now:
-# 0 = safe
-# 1 = moderate
-# 2 = hazardous
 def mask_to_hazard_label(mask_array):
     """
     Convert a segmentation mask into a single patch-level hazard label.
-    This is a simple heuristic baseline.
+    Simple heuristic baseline:
+    0 = safe
+    1 = moderate
+    2 = hazardous
     """
 
     unique, counts = np.unique(mask_array, return_counts=True)
@@ -21,8 +18,7 @@ def mask_to_hazard_label(mask_array):
     total = mask_array.size
     proportions = {k: v / total for k, v in label_dist.items()}
 
-    # Placeholder assumptions:
-    # Adjust once we inspect exact AI4Mars labels.
+    # Placeholder assumptions for grouped hazard classes
     sand_like = proportions.get(2, 0.0)
     rock_like = proportions.get(3, 0.0)
     soil_like = proportions.get(1, 0.0)
@@ -40,10 +36,14 @@ def preprocess_example(example, image_size=(128, 128)):
     image = example["image"]
     mask = example["label_mask"]
 
+    if mask is None:
+        return None, None
+
     if not isinstance(image, Image.Image):
         image = Image.fromarray(np.array(image))
+
     if not isinstance(mask, Image.Image):
-        mask = Image.fromarray(np.array(mask))
+        mask = Image.fromarray(np.array(mask).astype(np.uint8))
 
     image = image.resize(image_size)
     mask = mask.resize(image_size, resample=Image.NEAREST)
@@ -58,6 +58,10 @@ def preprocess_example(example, image_size=(128, 128)):
 
 def load_ai4mars_subset(split="train", num_samples=200):
     ds = load_dataset("hassanjbara/AI4MARS", split=split)
+
+    # Keep only samples with labels
+    ds = ds.filter(lambda ex: ex["has_labels"] is True and ex["label_mask"] is not None)
+
     ds = ds.select(range(min(num_samples, len(ds))))
     return ds
 
@@ -70,6 +74,10 @@ def prepare_numpy_dataset(split="train", num_samples=200, image_size=(128, 128))
 
     for ex in ds:
         img, lbl = preprocess_example(ex, image_size=image_size)
+
+        if img is None or lbl is None:
+            continue
+
         images.append(img)
         labels.append(lbl)
 
