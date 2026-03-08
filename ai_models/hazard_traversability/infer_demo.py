@@ -39,9 +39,17 @@ def run_inference_demo():
         logits = model(X_t)
         outputs = logits_to_outputs(logits)
 
+    probs = torch.softmax(logits, dim=1)
+
     print("=== HAZARD MODEL INFERENCE DEMO ===")
     for i, out in enumerate(outputs):
-        print(f"Sample {i}: true_label={LABEL_NAMES[int(y[i])]}, output={out}")
+    print(f"Sample {i}: true_label={LABEL_NAMES[int(y[i])]}, output={out}")
+    print("  class probs:",
+          {
+              "safe": float(probs[i, 0]),
+              "moderate": float(probs[i, 1]),
+              "hazardous": float(probs[i, 2]),
+          })
 
     fig, axes = plt.subplots(2, 4, figsize=(16, 8))
     axes = axes.flatten()
@@ -64,3 +72,8 @@ def run_inference_demo():
 
 if __name__ == "__main__":
     run_inference_demo()
+
+import os, datetime
+
+print("Loaded model timestamp:", datetime.datetime.fromtimestamp(os.path.getmtime(model_path)))
+print("Loaded model size:", os.path.getsize(model_path))
