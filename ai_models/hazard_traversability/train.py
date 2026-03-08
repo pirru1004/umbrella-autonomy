@@ -12,11 +12,11 @@ from ai_models.hazard_traversability.model import SimpleHazardCNN
 
 def train_model(
     split="train",
-    num_samples=800,
-    raw_limit=1200,
+    num_samples=1200,
+    raw_limit=1800,
     batch_size=16,
     learning_rate=1e-3,
-    num_epochs=8,
+    num_epochs=12,
     val_fraction=0.2,
     model_save_path="ai_models/hazard_traversability/hazard_cnn_baseline.pth"
 ):
@@ -45,6 +45,7 @@ def train_model(
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     model = SimpleHazardCNN(num_classes=3).to(device)
+
     class_counts = np.bincount(y, minlength=3)
     class_weights = 1.0 / class_counts
     class_weights = class_weights / class_weights.sum() * 3.0
@@ -54,6 +55,8 @@ def train_model(
 
     criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+    best_val_acc = 0.0
 
     for epoch in range(num_epochs):
         model.train()
@@ -103,9 +106,12 @@ def train_model(
             f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4f}"
         )
 
-    print("Saving trained weights NOW...")
-    torch.save(model.state_dict(), model_save_path)
-    print(f"Model saved to: {model_save_path}")
+        if val_acc > best_val_acc:
+            best_val_acc = val_acc
+            torch.save(model.state_dict(), model_save_path)
+            print(f"New best model saved at epoch {epoch+1}")
+
+    print("Best validation accuracy:", best_val_acc)
     print("Saved model timestamp:", datetime.datetime.fromtimestamp(os.path.getmtime(model_save_path)))
     print("Saved model size:", os.path.getsize(model_save_path))
 
