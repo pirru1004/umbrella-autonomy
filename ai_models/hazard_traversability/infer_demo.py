@@ -1,14 +1,13 @@
 import torch
-import numpy as np
 
 from ai_models.hazard_traversability.dataset_utils import prepare_numpy_dataset
 from ai_models.hazard_traversability.model import SimpleHazardCNN, logits_to_outputs
 
 
 def run_inference_demo():
-    X, y = prepare_numpy_dataset(split="train", num_samples=8)
+    X, y = prepare_numpy_dataset(split="train", num_samples=8, raw_limit=100)
 
-    X_t = torch.tensor(X).permute(0, 3, 1, 2)  # NHWC -> NCHW
+    X_t = torch.tensor(X).permute(0, 3, 1, 2)
 
     model = SimpleHazardCNN(num_classes=3)
     model.eval()
