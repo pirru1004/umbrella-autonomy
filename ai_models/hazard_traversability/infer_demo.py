@@ -18,6 +18,9 @@ def run_inference_demo():
     print("X shape:", X.shape)
     print("y shape:", y.shape)
 
+    unique, counts = np.unique(y, return_counts=True)
+    print("Label distribution:", {LABEL_NAMES[int(k)]: int(v) for k, v in zip(unique, counts)})
+
     X_t = torch.tensor(X).permute(0, 3, 1, 2)
 
     model = SimpleHazardCNN(num_classes=3)
@@ -47,9 +50,10 @@ def run_inference_demo():
     plt.tight_layout()
     plt.show()
 
+    # Optional: save figure as evidence
+    fig.savefig("hazard_inference_demo.png", dpi=200, bbox_inches="tight")
+    print("Saved evidence image as: hazard_inference_demo.png")
 
-unique, counts = np.unique(y, return_counts=True)
-print("Label distribution:", dict(zip(unique, counts)))
 
 if __name__ == "__main__":
     run_inference_demo()
