@@ -1,6 +1,7 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 
 from ai_models.hazard_traversability.dataset_utils import prepare_numpy_dataset
 from ai_models.hazard_traversability.model import SimpleHazardCNN, logits_to_outputs
@@ -24,6 +25,14 @@ def run_inference_demo():
     X_t = torch.tensor(X).permute(0, 3, 1, 2)
 
     model = SimpleHazardCNN(num_classes=3)
+
+    model_path = "ai_models/hazard_traversability/hazard_cnn_baseline.pth"
+    if os.path.exists(model_path):
+        model.load_state_dict(torch.load(model_path, map_location="cpu"))
+        print(f"Loaded trained model from: {model_path}")
+    else:
+        print("WARNING: trained model not found, using untrained weights.")
+
     model.eval()
 
     with torch.no_grad():
@@ -34,7 +43,6 @@ def run_inference_demo():
     for i, out in enumerate(outputs):
         print(f"Sample {i}: true_label={LABEL_NAMES[int(y[i])]}, output={out}")
 
-    # Evidence visualization
     fig, axes = plt.subplots(2, 4, figsize=(16, 8))
     axes = axes.flatten()
 
@@ -50,7 +58,6 @@ def run_inference_demo():
     plt.tight_layout()
     plt.show()
 
-    # Optional: save figure as evidence
     fig.savefig("hazard_inference_demo.png", dpi=200, bbox_inches="tight")
     print("Saved evidence image as: hazard_inference_demo.png")
 
