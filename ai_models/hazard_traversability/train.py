@@ -50,9 +50,9 @@ def train_model(
     class_weights = class_weights / class_weights.sum() * 3.0
     class_weights = torch.tensor(class_weights, dtype=torch.float32).to(device)
 
-print("Class weights:", class_weights)
+    print("Class weights:", class_weights)
 
-criterion = nn.CrossEntropyLoss(weight=class_weights)
+    criterion = nn.CrossEntropyLoss(weight=class_weights)
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     for epoch in range(num_epochs):
