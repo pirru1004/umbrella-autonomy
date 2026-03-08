@@ -41,6 +41,8 @@ def preprocess_example(example, image_size=(128, 128)):
     if not isinstance(image, Image.Image):
         image = Image.fromarray(np.array(image).astype(np.uint8))
 
+    image = image.convert("RGB")
+
     if not isinstance(mask, Image.Image):
         mask = Image.fromarray(np.array(mask).astype(np.uint8))
 
@@ -50,7 +52,6 @@ def preprocess_example(example, image_size=(128, 128)):
     image_np = np.array(image).astype(np.float32) / 255.0
     mask_np = np.array(mask)
 
-    # If mask has channels, keep only one
     if len(mask_np.shape) > 2:
         mask_np = mask_np[..., 0]
 
