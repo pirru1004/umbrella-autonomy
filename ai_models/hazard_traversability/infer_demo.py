@@ -5,9 +5,6 @@ import numpy as np
 from ai_models.hazard_traversability.dataset_utils import prepare_numpy_dataset
 from ai_models.hazard_traversability.model import SimpleHazardCNN, logits_to_outputs
 
-unique, counts = np.unique(y, return_counts=True)
-print("Label distribution:", dict(zip(unique, counts)))
-
 LABEL_NAMES = {
     0: "safe",
     1: "moderate",
@@ -50,6 +47,9 @@ def run_inference_demo():
     plt.tight_layout()
     plt.show()
 
+
+unique, counts = np.unique(y, return_counts=True)
+print("Label distribution:", dict(zip(unique, counts)))
 
 if __name__ == "__main__":
     run_inference_demo()
